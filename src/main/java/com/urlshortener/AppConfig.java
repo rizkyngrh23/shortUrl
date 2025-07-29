@@ -37,10 +37,13 @@ public class AppConfig {
 
     public String getDatabaseUrl() {
         String databaseUrl = System.getenv("DATABASE_URL");
+        System.out.println("DEBUG: DATABASE_URL = " + databaseUrl);
         if (databaseUrl != null) {
             return databaseUrl;
         }
-        return getProperty("DB_URL", System.getenv("DB_URL"));
+        String dbUrl = System.getenv("DB_URL");
+        System.out.println("DEBUG: DB_URL = " + dbUrl);
+        return getProperty("DB_URL", dbUrl);
     }
 
     public String getDatabaseUsername() {

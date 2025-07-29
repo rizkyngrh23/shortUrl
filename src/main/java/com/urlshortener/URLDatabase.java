@@ -22,8 +22,10 @@ public class URLDatabase {
 
     private void initializeDatabase() throws SQLException {
         try {
-            Class.forName(config.getDatabaseDriver());
+            Class.forName("org.postgresql.Driver");
+            System.out.println("DEBUG: PostgreSQL driver loaded successfully");
         } catch (ClassNotFoundException e) {
+            System.err.println("ERROR: PostgreSQL driver not found in classpath");
             throw new SQLException("PostgreSQL driver not found", e);
         }
         
@@ -31,11 +33,16 @@ public class URLDatabase {
         String username = config.getDatabaseUsername();
         String password = config.getDatabasePassword();
         
+        System.out.println("DEBUG: Attempting to connect with URL: " + databaseUrl);
+        System.out.println("DEBUG: Username: " + username);
+        System.out.println("DEBUG: Password: " + (password != null ? "[HIDDEN]" : "null"));
+        
         if (username != null && password != null) {
             connection = DriverManager.getConnection(databaseUrl, username, password);
         } else {
             connection = DriverManager.getConnection(databaseUrl);
         }
+        System.out.println("DEBUG: Database connection successful");
         createTables();
     }
 
