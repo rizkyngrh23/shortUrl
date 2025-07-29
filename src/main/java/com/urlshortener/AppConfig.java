@@ -39,6 +39,11 @@ public class AppConfig {
         String databaseUrl = System.getenv("DATABASE_URL");
         System.out.println("DEBUG: DATABASE_URL = " + databaseUrl);
         if (databaseUrl != null) {
+            // Convert Railway's postgresql:// format to JDBC format
+            if (databaseUrl.startsWith("postgresql://")) {
+                databaseUrl = "jdbc:" + databaseUrl;
+                System.out.println("DEBUG: Converted to JDBC format: " + databaseUrl);
+            }
             return databaseUrl;
         }
         String dbUrl = System.getenv("DB_URL");
