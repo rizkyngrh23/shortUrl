@@ -21,8 +21,11 @@ public class URLValidator {
         if (urlString == null || urlString.trim().isEmpty()) {
             return false;
         }
+        
         try {
-            URI uri = new URI(urlString);
+            String normalizedUrl = normalizeUrl(urlString);
+            
+            URI uri = new URI(normalizedUrl);
             URL url = uri.toURL();
             
             String protocol = url.getProtocol().toLowerCase();
@@ -31,20 +34,45 @@ public class URLValidator {
             }
             
             for (Pattern pattern : MALICIOUS_PATTERNS) {
-                if (pattern.matcher(urlString).find()) {
+                if (pattern.matcher(normalizedUrl).find()) {
                     return false;
                 }
             }
             
-            if (url.getHost() == null || url.getHost().trim().isEmpty()) {
+            String host = url.getHost();
+            if (host == null || host.trim().isEmpty()) {
+                return false;
+            }
+            
+            if (!isValidHostname(host)) {
                 return false;
             }
             
             return true;
             
-        } catch (MalformedURLException | URISyntaxException e) {
+        } catch (MalformedURLException | URISyntaxException | IllegalArgumentException e) {
             return false;
         }
+    }
+    
+    private static boolean isValidHostname(String hostname) {
+        if (hostname == null || hostname.trim().isEmpty()) {
+            return false;
+        }
+        
+        if (hostname.equals("localhost") || hostname.equals("127.0.0.1")) {
+            return true;
+        }
+        
+        if (hostname.matches("^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$")) {
+            return true;
+        }
+        
+        if (!hostname.contains(".")) {
+            return false;
+        }
+        
+        return hostname.matches("^[a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?(\\.[a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?)*$");
     }
 
     public static String normalizeUrl(String url) {

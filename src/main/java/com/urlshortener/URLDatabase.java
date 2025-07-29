@@ -27,11 +27,15 @@ public class URLDatabase {
             throw new SQLException("PostgreSQL driver not found", e);
         }
         
-        connection = DriverManager.getConnection(
-            config.getDatabaseUrl(), 
-            config.getDatabaseUsername(), 
-            config.getDatabasePassword()
-        );
+        String databaseUrl = config.getDatabaseUrl();
+        String username = config.getDatabaseUsername();
+        String password = config.getDatabasePassword();
+        
+        if (username != null && password != null) {
+            connection = DriverManager.getConnection(databaseUrl, username, password);
+        } else {
+            connection = DriverManager.getConnection(databaseUrl);
+        }
         createTables();
     }
 

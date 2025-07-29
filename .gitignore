@@ -23,3 +23,7 @@ Thumbs.db
 logs/
 application.properties
 database-setup.sql
+.env
+.env.local
+.env.development
+.env.production

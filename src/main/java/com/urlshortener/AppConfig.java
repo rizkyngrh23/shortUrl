@@ -10,6 +10,7 @@ public class AppConfig {
     private Properties properties;
 
     private AppConfig() {
+        EnvLoader.loadEnv();
         loadProperties();
     }
 
@@ -35,15 +36,27 @@ public class AppConfig {
     }
 
     public String getDatabaseUrl() {
-        return getProperty("db.url", "jdbc:postgresql://localhost:5432/url-shortener");
+        String databaseUrl = System.getenv("DATABASE_URL");
+        if (databaseUrl != null) {
+            return databaseUrl;
+        }
+        return getProperty("DB_URL", System.getenv("DB_URL"));
     }
 
     public String getDatabaseUsername() {
-        return getProperty("db.username", "postgres");
+        String databaseUrl = System.getenv("DATABASE_URL");
+        if (databaseUrl != null) {
+            return null;
+        }
+        return getProperty("DB_USERNAME", System.getenv("DB_USERNAME"));
     }
 
     public String getDatabasePassword() {
-        return getProperty("db.password", "kiki2002");
+        String databaseUrl = System.getenv("DATABASE_URL");
+        if (databaseUrl != null) {
+            return null;
+        }
+        return getProperty("DB_PASSWORD", System.getenv("DB_PASSWORD"));
     }
 
     public String getDatabaseDriver() {
@@ -59,11 +72,31 @@ public class AppConfig {
     }
 
     public String getServerHost() {
-        return getProperty("server.host", "localhost");
+        String host = System.getenv("SERVER_HOST");
+        if (host != null) {
+            return host;
+        }
+        return getProperty("SERVER_HOST", "0.0.0.0");
     }
 
     public int getServerPort() {
-        return getIntProperty("server.port", 8080);
+        String port = System.getenv("PORT");
+        if (port != null) {
+            try {
+                return Integer.parseInt(port);
+            } catch (NumberFormatException e) {
+                System.err.println("Warning: Invalid PORT value: " + port);
+            }
+        }
+        String serverPort = System.getenv("SERVER_PORT");
+        if (serverPort != null) {
+            try {
+                return Integer.parseInt(serverPort);
+            } catch (NumberFormatException e) {
+                System.err.println("Warning: Invalid SERVER_PORT value: " + serverPort);
+            }
+        }
+        return getIntProperty("SERVER_PORT", 8080);
     }
 
     public int getServerThreads() {
@@ -71,11 +104,29 @@ public class AppConfig {
     }
 
     public String getBaseUrl() {
-        String baseUrl = getProperty("app.base.url", null);
-        if (baseUrl == null) {
-            baseUrl = String.format("http://%s:%d", getServerHost(), getServerPort());
+        String baseUrl = System.getenv("BASE_URL");
+        if (baseUrl != null) {
+            return baseUrl;
         }
-        return baseUrl;
+        
+        baseUrl = getProperty("BASE_URL", null);
+        if (baseUrl != null) {
+            return baseUrl;
+        }
+        
+        String protocol = "https";
+        String host = getServerHost();
+        int port = getServerPort();
+        
+        if (host.equals("localhost") || host.equals("127.0.0.1")) {
+            protocol = "http";
+        }
+        
+        if ((protocol.equals("https") && port == 443) || (protocol.equals("http") && port == 80)) {
+            return String.format("%s://%s", protocol, host);
+        } else {
+            return String.format("%s://%s:%d", protocol, host, port);
+        }
     }
 
     public int getShortCodeLength() {

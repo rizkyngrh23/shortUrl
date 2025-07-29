@@ -14,7 +14,7 @@ public class URLShortenerServer {
 
     public URLShortenerServer(int port, String host) throws IOException, SQLException {
         this.config = AppConfig.getInstance();
-        this.baseUrl = String.format("http://%s:%d", host, port);
+        this.baseUrl = config.getBaseUrl();
         this.urlService = new URLShortenerService();
         this.server = HttpServer.create(new InetSocketAddress(host, port), 0);
         
